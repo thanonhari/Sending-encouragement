@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ส่งกำลังใจ</title>
+    <!-- เพิ่ม Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: url('https://images.dmc.tv/wallpaper/raw/14180.jpg') center/cover no-repeat;
+        }
+        .navbar {
+            width: 100%;
+            background-color: #333;
+            padding: 1% 2%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 0.8% 1.5%;
+            font-size: clamp(14px, 2vw, 18px);
+        }
+        .navbar a:hover {
+            background-color: #555;
+        }
+        .navbar .right-links {
+            display: flex;
+            align-items: center;
+        }
+        .navbar .right-links a {
+            margin-left: 10px;
+        }
+        .card-container {
+            perspective: 1000px;
+            width: clamp(300px, 80vw, 400px);
+            height: clamp(400px, 60vh, 500px);
+            position: relative;
+            margin: 10vh auto 5vh;
+        }
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.8s;
+        }
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .front {
+            background: url('https://i.pinimg.com/736x/6b/2b/10/6b2b106ee04800cdd7c4127520156df1.jpg') center/contain no-repeat;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 5%;
+            color: white;
+            text-shadow: 0 0 5px rgba(0,0,0,0.8);
+        }
+        .back {
+            background-color: white;
+            transform: rotateY(180deg);
+            padding: 5%;
+            text-align: center;
+        }
+        .front h2, .back h3 {
+            font-size: clamp(18px, 3vw, 24px);
+            margin-bottom: 2%;
+        }
+        select, input, textarea {
+            margin: 2% 0;
+            padding: 2%;
+            width: 90%;
+            font-size: clamp(12px, 2vw, 16px);
+        }
+        textarea {
+            resize: none;
+            height: 80px;
+        }
+        button {
+            padding: 2% 5%;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: clamp(12px, 2vw, 16px);
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        footer {
+            width: 100%;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 1% 0;
+            font-size: clamp(12px, 1.5vw, 16px);
+        }
+        .progress-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .progress-bar-container {
+            width: 300px;
+            background-color: #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar {
+            height: 30px;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 0.1s linear;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+            font-weight: bold;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1001;
+            text-align: center;
+            max-width: 80%;
+            white-space: pre-wrap;
+        }
+        .popup button {
+            margin-top: 10px;
+            background-color: #4CAF50;
+        }
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .image-change-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1001;
+            text-align: center;
+            width: 300px;
+        }
+        .image-change-popup h3 {
+            margin-bottom: 15px;
+            font-size: clamp(16px, 2vw, 20px);
+        }
+        .image-change-popup input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            font-size: clamp(12px, 1.5vw, 16px);
+        }
+        .image-change-popup .button-group {
+            display: flex;
+            justify-content: space-between;
+        }
+        .image-change-popup button {
+            width: 48%;
+            padding: 8px;
+        }
+        .image-change-popup .close-btn {
+            background-color: #f44336;
+        }
+        .image-change-popup .close-btn:hover {
+            background-color: #d32f2f;
+        }
+        .datetime {
+            color: white;
+            font-size: clamp(12px, 1.5vw, 16px);
+            padding: 0.8% 1.5%;
+        }
+        #customMessage {
+            display: none;
+        }
+        @media (max-width: 600px) {
+            .card-container {
+                width: 90vw;
+                height: 50vh;
+            }
+            .navbar {
+                padding: 2% 3%;
+            }
+            .datetime {
+                font-size: clamp(10px, 1.2vw, 14px);
+            }
+            .image-change-popup {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="datetime" id="datetime"></div>
+        <div class="right-links">
+            <a href="#" onclick="showImageChangePopup()"><i class="fas fa-image"></i></a>
+            <a href="settings.html"><i class="fas fa-cog"></i></a>
+        </div>
+    </div>
+
+    <div class="card-container">
+        <div class="card" id="card">
+            <div class="front" id="cardFront">
+                <h2>ส่งกำลังใจ</h2>
+                <button onclick="flipCard()">กรุณากดปุ่ม</button>
+            </div>
+            <div class="back">
+                <h3>ลงนามถวายพระพร</h3>
+                <select id="messageType" onchange="updateBlessingOptions()">
+                    <option value="royal">ลงนามถวายพระพร</option>
+                    <option value="festival">อวยพรตามเทศกาล</option>
+                    <option value="encouragement">ส่งให้กำลังใจ</option>
+                </select>
+                <select id="blessing" onchange="toggleCustomMessage()">
+                    <option value="1">ขอพระองค์ทรงพระเจริญยิ่งยืนนาน</option>
+                    <option value="2">ขอพระองค์ทรงมีพระพลานามัยแข็งแรง</option>
+                    <option value="3">ขอพระองค์ทรงพระเกษมสำราญ</option>
+                    <option value="custom">พิมพ์เอง</option>
+                </select>
+                <textarea id="customMessage" placeholder="พิมพ์คำอวยพรของคุณ"></textarea>
+                <input type="text" id="firstName" placeholder="ชื่อ-นามสกุล">
+                <input type="text" id="lastName" placeholder="หน่วยงาน/จังหวัด">
+                <button onclick="submitBlessing()">บันทึกและส่ง</button>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p>© 2025 ส่งกำลังใจ | พัฒนาโดย ครูนิด ศิษย์หลวงพ่อเสือ เขียนโปแกรมโดย xAI</p>
+    </footer>
+
+    <!-- Progress Bar HTML -->
+    <div class="progress-overlay" id="progressOverlay">
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar">0%</div>
+        </div>
+    </div>
+
+    <!-- Popup HTML -->
+    <div class="popup-overlay" id="popupOverlay"></div>
+    <div class="popup" id="popup">
+        <p id="popupMessage"></p>
+        <button onclick="hidePopup()">ตกลง</button>
+    </div>
+
+    <!-- Image Change Popup HTML -->
+    <div class="popup-overlay" id="imageChangeOverlay"></div>
+    <div class="image-change-popup" id="imageChangePopup">
+        <h3>อัปโหลดรูปภาพ</h3>
+        <input type="file" id="imageFile" accept="image/*">
+        <div class="button-group">
+            <button onclick="changeImage()">อัปโหลด</button>
+            <button class="close-btn" onclick="hideImageChangePopup()">ปิด</button>
+        </div>
+    </div>
+
+    <script>
+        let currentImageUrl = localStorage.getItem('currentImage') || 'https://i.pinimg.com/736x/6b/2b/10/6b2b106ee04800cdd7c4127520156df1.jpg';
+        document.getElementById('cardFront').style.background = `url('${currentImageUrl}') center/contain no-repeat`;
+
+        const blessingOptions = {
+            royal: [
+                { value: "1", text: "ขอพระองค์ทรงพระเจริญยิ่งยืนนาน" },
+                { value: "2", text: "ขอพระองค์ทรงมีพระพลานามัยแข็งแรง" },
+                { value: "3", text: "ขอพระองค์ทรงพระเกษมสำราญ" },
+                { value: "custom", text: "พิมพ์เอง" }
+            ],
+            festival: [
+                { value: "1", text: "สวัสดีปีใหม่ ขอให้มีความสุขตลอดปี" },
+                { value: "2", text: "สุขสันต์วันสงกรานต์ ขอให้สดชื่นรื่นเริง" },
+                { value: "3", text: "สุขสันต์วันคริสต์มาส ขอให้พบแต่สิ่งดีๆ" },
+                { value: "custom", text: "พิมพ์เอง" }
+            ],
+            encouragement: [
+                { value: "1", text: "สู้ๆ นะ ขอให้ผ่านพ้นทุกอุปสรรค" },
+                { value: "2", text: "ขอให้มีกำลังใจที่ดีในทุกๆ วัน" },
+                { value: "3", text: "คุณทำได้! ขอให้ประSuccesสำเร็จ" },
+                { value: "custom", text: "พิมพ์เอง" }
+            ]
+        };
+
+        function updateBlessingOptions() {
+            const messageType = document.getElementById('messageType').value;
+            const blessingSelect = document.getElementById('blessing');
+            blessingSelect.innerHTML = '';
+            const options = blessingOptions[messageType];
+            options.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option.value;
+                opt.textContent = option.text;
+                blessingSelect.appendChild(opt);
+            });
+            toggleCustomMessage();
+        }
+
+        function toggleCustomMessage() {
+            const blessingSelect = document.getElementById('blessing');
+            const customMessage = document.getElementById('customMessage');
+            if (blessingSelect.value === 'custom') {
+                customMessage.style.display = 'block';
+            } else {
+                customMessage.style.display = 'none';
+                customMessage.value = '';
+            }
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            const options = {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+            const dateTimeString = now.toLocaleString('th-TH', options)
+                .replace(' ', ' ')
+                .replace(',', '');
+            document.getElementById('datetime').textContent = dateTimeString;
+        }
+
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+
+        function showProgress() {
+            const overlay = document.getElementById('progressOverlay');
+            const progressBar = document.getElementById('progressBar');
+            overlay.style.display = 'flex';
+            let progress = 0;
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+            const interval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = `${progress}%`;
+                progressBar.textContent = `${progress}%`;
+                if (progress >= 100) {
+                    clearInterval(interval);
+                }
+            }, 100);
+        }
+
+        function hideProgress() {
+            document.getElementById('progressOverlay').style.display = 'none';
+        }
+
+        function flipCard() {
+            document.getElementById('card').classList.toggle('flipped');
+        }
+
+        function showPopup(message) {
+            document.getElementById('popupMessage').textContent = message;
+            document.getElementById('popup').style.display = 'block';
+            document.getElementById('popupOverlay').style.display = 'block';
+        }
+
+        function hidePopup() {
+            document.getElementById('popup').style.display = 'none';
+            document.getElementById('popupOverlay').style.display = 'none';
+        }
+
+        function showImageChangePopup() {
+            document.getElementById('imageChangePopup').style.display = 'block';
+            document.getElementById('imageChangeOverlay').style.display = 'block';
+            document.getElementById('imageFile').value = '';
+        }
+
+        function hideImageChangePopup() {
+            document.getElementById('imageChangePopup').style.display = 'none';
+            document.getElementById('imageChangeOverlay').style.display = 'none';
+        }
+
+        function changeImage() {
+            const imageFile = document.getElementById('imageFile').files[0];
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imageDataUrl = e.target.result;
+                    showProgress();
+                    setTimeout(() => {
+                        localStorage.setItem('currentImage', imageDataUrl);
+                        currentImageUrl = imageDataUrl;
+                        document.getElementById('cardFront').style.background = `url('${imageDataUrl}') center/contain no-repeat`;
+                        hideProgress();
+                        hideImageChangePopup();
+                        showPopup('อัปโหลดรูปภาพสำเร็จ!');
+                    }, 1000);
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                showPopup('กรุณาเลือกไฟล์รูปภาพ');
+            }
+        }
+
+        function dataURLtoBlob(dataURL) {
+            const arr = dataURL.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new Blob([u8arr], { type: mime });
+        }
+
+        function submitBlessing() {
+            const botToken = localStorage.getItem('botToken');
+            const chatId = localStorage.getItem('chatId');
+
+            if (!botToken || !chatId) {
+                showPopup('กรุณาตั้งค่า Bot Token และ Chat ID ก่อน\nไปที่การตั้งค่าโดยคลิกไอคอนฟันเฟืองใน Navbar');
+                return;
+            }
+
+            const messageTypeSelect = document.getElementById('messageType');
+            const messageTypeText = messageTypeSelect.options[messageTypeSelect.selectedIndex].text;
+            const blessingSelect = document.getElementById('blessing');
+            let blessingText = blessingSelect.options[blessingSelect.selectedIndex].text;
+
+            if (blessingSelect.value === 'custom') {
+                blessingText = document.getElementById('customMessage').value.trim();
+                if (!blessingText) {
+                    showPopup('กรุณาพิมพ์คำอวยพร');
+                    return;
+                }
+            }
+
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+
+            if (!firstName || !lastName) {
+                showPopup('กรุณากรอกชื่อ-นามสกุลและหน่วยงาน/จังหวัด');
+                return;
+            }
+
+            const message = `<b>📜 ${messageTypeText}</b>\n\n` +
+                           `<b>คำอวยพร:</b> ${blessingText}\n` +
+                           `<b>ชื่อ-นามสกุล:</b> ${firstName}\n` +
+                           `<b>หน่วยงาน/จังหวัด:</b> ${lastName}\n` +
+                           `\n<i>วันที่:</i> ${new Date().toLocaleString('th-TH')}`;
+
+            const popupMessage = `📜 ${messageTypeText}\n\n` +
+                                 `คำอวยพร: ${blessingText}\n` +
+                                 `ชื่อ-นามสกุล: ${firstName}\n` +
+                                 `หน่วยงาน/จังหวัด: ${lastName}\n` +
+                                 `วันที่: ${new Date().toLocaleString('th-TH')}`;
+
+            showProgress();
+            setTimeout(() => {
+                sendPhotoToTelegram()
+                    .then(data => {
+                        if (!data.ok) {
+                            throw new Error(data.description);
+                        }
+                        return sendMessageToTelegram(message);
+                    })
+                    .then(data => {
+                        hideProgress();
+                        if (data.ok) {
+                            showPopup(`${popupMessage}\n\nส่งสำเร็จ!`);
+                        } else {
+                            showPopup(`${popupMessage}\n\nเกิดข้อผิดพลาดในการส่งไป Telegram: ${data.description}`);
+                        }
+                        flipCard();
+                    })
+                    .catch(error => {
+                        hideProgress();
+                        showPopup(`${popupMessage}\n\nเกิดข้อผิดพลาดในการส่งไป Telegram: ${error.message}`);
+                        flipCard();
+                    });
+            }, 1000);
+        }
+
+        function sendPhotoToTelegram() {
+            const botToken = localStorage.getItem('botToken');
+            const chatId = localStorage.getItem('chatId');
+            const url = `https://api.telegram.org/bot${botToken}/sendPhoto`;
+            const blob = dataURLtoBlob(currentImageUrl);
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('photo', blob, 'image.jpg');
+
+            return fetch(url, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json());
+        }
+
+        function sendMessageToTelegram(message) {
+            const botToken = localStorage.getItem('botToken');
+            const chatId = localStorage.getItem('chatId');
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}&parse_mode=HTML`;
+            return fetch(url)
+                .then(response => response.json());
+        }
+
+        updateBlessingOptions();
+    </script>
+</body>
+</html>
+
